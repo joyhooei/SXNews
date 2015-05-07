@@ -19,6 +19,10 @@
 
 @end
 
+#define EALog(s,...) NSLog(@"<%@: 行 %d> %@ %@", [[NSString stringWithUTF8String:__FILE__] lastPathComponent], __LINE__, [NSString stringWithUTF8String:__PRETTY_FUNCTION__], [NSString stringWithFormat:(s), ##__VA_ARGS__]);
+
+
+
 @implementation SXTableViewController
 
 - (void)viewDidLoad {
@@ -52,7 +56,7 @@
 
 - (void)viewWillAppear:(BOOL)animated
 {
-//    NSLog(@"bbbb");
+    EALog(@"bbbb");
     [self.tableView headerBeginRefreshing];
     [[NSNotificationCenter defaultCenter]postNotification:[NSNotification notificationWithName:@"contentStart" object:nil]];
 }
@@ -61,7 +65,7 @@
 - (void)loadData
 {
     // http://c.m.163.com//nc/article/headline/T1348647853363/0-30.html
-//    NSLog(@"%@",self.urlString);
+    EALog(@"%@",self.urlString);
     [[[SXNetworkTools sharedNetworkTools]GET:self.urlString parameters:nil success:^(NSURLSessionDataTask *task, NSDictionary* responseObject) {
         
         NSString *key = [responseObject.keyEnumerator nextObject];
@@ -78,7 +82,7 @@
         [self.tableView headerEndRefreshing];
         
     } failure:^(NSURLSessionDataTask *task, NSError *error) {
-        NSLog(@"%@",error);
+        EALog(@"%@",error);
     }] resume];
 
 }

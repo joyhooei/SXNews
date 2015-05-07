@@ -29,6 +29,9 @@
 
 @implementation SXDetailController
 
+#define EALog(s,...) NSLog(@"<%@: 行 %d> %@ %@", [[NSString stringWithUTF8String:__FILE__] lastPathComponent], __LINE__, [NSString stringWithUTF8String:__PRETTY_FUNCTION__], [NSString stringWithFormat:(s), ##__VA_ARGS__]);
+
+
 
 - (NSMutableArray *)replyModels
 {
@@ -64,7 +67,7 @@
         self.detailModel = [SXDetailModel detailWithDict:responseObject[self.newsModel.docid]];
         [self showInWebView];
     } failure:^(AFHTTPRequestOperation *operation, NSError *error) {
-        NSLog(@"failure %@",error);
+        EALog(@"failure %@",error);
     }];
     
     //  http://comment.api.163.com/api/json/post/list/new/hot/ent2_bbs/AI1O4EEK00032DGD/0/10/10/2/2
@@ -77,8 +80,8 @@
     
     [self.replyCountBtn setTitle:displayCount forState:UIControlStateNormal];
     
-    NSLog(@"%@",self.news[1]);
-    NSLog(@"%@----%@",replyURL,docID);
+    EALog(@"%@",self.news[1]);
+    EALog(@"%@----%@",replyURL,docID);
     
     // 假数据
 //    NSString *url2 = @"http://comment.api.163.com/api/json/post/list/new/hot/photoview_bbs/PHOT1ODB009654GK/0/10/10/2/2";
@@ -119,7 +122,7 @@
         
 #warning TODO
     } failure:^(AFHTTPRequestOperation *operation, NSError *error) {
-        NSLog(@"failure %@",error);
+        EALog(@"failure %@",error);
     }];
 }
 

@@ -35,6 +35,10 @@
 
 @end
 
+
+#define EALog(s,...) NSLog(@"<%@: 行 %d> %@ %@", [[NSString stringWithUTF8String:__FILE__] lastPathComponent], __LINE__, [NSString stringWithUTF8String:__PRETTY_FUNCTION__], [NSString stringWithFormat:(s), ##__VA_ARGS__]);
+
+
 @implementation SXPhotoSetController
 - (IBAction)backBtnClick:(id)sender {
     [self.navigationController popViewControllerAnimated:YES];
@@ -95,7 +99,7 @@
         [self setImageViewWithModel:photoSet];
         
             } failure:^(AFHTTPRequestOperation *operation, NSError *error) {
-        NSLog(@"failure %@",error);
+        EALog(@"failure %@",error);
     }];
 
 }
@@ -121,7 +125,7 @@
         
 #warning TODO
     } failure:^(AFHTTPRequestOperation *operation, NSError *error) {
-        NSLog(@"failure %@",error);
+        EALog(@"failure %@",error);
     }];
 }
 

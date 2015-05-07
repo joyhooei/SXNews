@@ -246,6 +246,7 @@
 		1D925CCA1A87CA030063921A /* UIView+MJExtension.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "UIView+MJExtension.m"; sourceTree = "<group>"; };
 		1DC4731A1A81377B00DA905D /* UIView+Frame.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "UIView+Frame.h"; sourceTree = "<group>"; };
 		1DC4731B1A81377B00DA905D /* UIView+Frame.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "UIView+Frame.m"; sourceTree = "<group>"; };
+		4BC7E5B41AFB462B000BD130 /* wyPrefix.pch */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = wyPrefix.pch; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -363,6 +364,7 @@
 				1D58EED71A70C18000411E39 /* NewsURLs.plist */,
 				1D2A59091A700822001F9B8E /* Info.plist */,
 				1D2A590A1A700822001F9B8E /* main.m */,
+				4BC7E5B41AFB462B000BD130 /* wyPrefix.pch */,
 			);
 			name = "Supporting Files";
 			sourceTree = "<group>";

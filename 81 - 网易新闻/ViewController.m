@@ -23,6 +23,8 @@
     // Do any additional setup after loading the view, typically from a nib.
 }
 
+#define EALog(s,...) NSLog(@"<%@: 行 %d> %@ %@", [[NSString stringWithUTF8String:__FILE__] lastPathComponent], __LINE__, [NSString stringWithUTF8String:__PRETTY_FUNCTION__], [NSString stringWithFormat:(s), ##__VA_ARGS__]);
+
 #pragma mark - /************************* 在这里做完实验就不用了 ***************************/
 - (void)touchesBegan:(NSSet *)touches withEvent:(UIEvent *)event {
     
@@ -43,7 +45,7 @@
         NSMutableArray *arrayM = [NSMutableArray arrayWithCapacity:temArray.count];
         [temArray enumerateObjectsUsingBlock:^(id obj, NSUInteger idx, BOOL *stop) {
             
-            NSLog(@"=====》%tu",idx);
+            EALog(@"=====》%tu",idx);
             SXNewsModel *news = [SXNewsModel newsModelWithDict:obj];
             [arrayM addObject:news];
         }];
