@@ -29,9 +29,6 @@
 
 @implementation SXDetailController
 
-#define EALog(s,...) NSLog(@"<%@: 行 %d> %@ %@", [[NSString stringWithUTF8String:__FILE__] lastPathComponent], __LINE__, [NSString stringWithUTF8String:__PRETTY_FUNCTION__], [NSString stringWithFormat:(s), ##__VA_ARGS__]);
-
-
 
 - (NSMutableArray *)replyModels
 {
@@ -67,27 +64,34 @@
         self.detailModel = [SXDetailModel detailWithDict:responseObject[self.newsModel.docid]];
         [self showInWebView];
     } failure:^(AFHTTPRequestOperation *operation, NSError *error) {
-        EALog(@"failure %@",error);
+        NSLog(@"failure %@",error);
     }];
     
     //  http://comment.api.163.com/api/json/post/list/new/hot/ent2_bbs/AI1O4EEK00032DGD/0/10/10/2/2
     
-    NSString *replyURL = self.news[self.index][@"replyUrl"];
+//    NSString *replyURL = self.news[self.index][@"replyUrl"];
     NSString *docID = self.newsModel.docid;
     
-    CGFloat count =  [self.newsModel.replyCount intValue]/1000.0;
-    NSString *displayCount = [NSString stringWithFormat:@"%.1f万跟帖",count];
+    
+    CGFloat count =  [self.newsModel.replyCount intValue];
+    NSString *displayCount;
+    if (count > 10000) {
+        displayCount = [NSString stringWithFormat:@"%.1f万跟帖",count/10000];
+    }else{
+        displayCount = [NSString stringWithFormat:@"%.0f跟帖",count];
+    }
+    
     
     [self.replyCountBtn setTitle:displayCount forState:UIControlStateNormal];
     
-    EALog(@"%@",self.news[1]);
-    EALog(@"%@----%@",replyURL,docID);
+    NSLog(@"%@",self.news[1]);
+    NSLog(@"%@----%@",self.newsModel.boardid,docID);
     
     // 假数据
 //    NSString *url2 = @"http://comment.api.163.com/api/json/post/list/new/hot/photoview_bbs/PHOT1ODB009654GK/0/10/10/2/2";
     
     // 真数据
-    NSString *url2 = [NSString stringWithFormat:@"http://comment.api.163.com/api/json/post/list/new/hot/%@/%@/0/10/10/2/2",replyURL,docID];
+    NSString *url2 = [NSString stringWithFormat:@"http://comment.api.163.com/api/json/post/list/new/hot/%@/%@/0/10/10/2/2",self.newsModel.boardid,docID];
     [self sendRequestWithUrl2:url2];
     
     self.automaticallyAdjustsScrollViewInsets = NO;
@@ -95,7 +99,17 @@
 - (void)viewWillAppear:(BOOL)animated
 {
     [self.navigationController setNavigationBarHidden:YES animated:YES];
+    self.tabBarController.tabBar.hidden = YES;
 }
+
+//- (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil
+//{
+//    self = [super initWithNibName:nibNameOrNil bundle:nibBundleOrNil];
+//    if (self) {
+//        self.hidesBottomBarWhenPushed=YES;
+//    }
+//    return self;
+//}
 
 /** 提前把评论的请求也发出去 得到评论的信息 */
 - (void)sendRequestWithUrl2:(NSString *)url
@@ -120,9 +134,8 @@
             }
         }
         
-#warning TODO
     } failure:^(AFHTTPRequestOperation *operation, NSError *error) {
-        EALog(@"failure %@",error);
+        NSLog(@"failure %@",error);
     }];
 }
 
@@ -222,11 +235,18 @@
     SXReplyViewController *replyvc = segue.destinationViewController;
     replyvc.replys = self.replyModels;
     
+    if ([self.navigationController respondsToSelector:@selector(interactivePopGestureRecognizer)]) {
+        self.navigationController.interactivePopGestureRecognizer.delegate = nil;
+    }
+    
     [[NSNotificationCenter defaultCenter]postNotification:[NSNotification notificationWithName:@"contentStart" object:nil]];
 }
 
 
-
+- (void)dealloc
+{
+    NSLog(@"%s",__func__);
+}
 
 
 @end

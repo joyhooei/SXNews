@@ -49,21 +49,30 @@
 {
     _NewsModel = NewsModel;
     
-    [self.imgIcon sd_setImageWithURL:[NSURL URLWithString:self.NewsModel.imgsrc]];
+//    [self.imgIcon sd_setImageWithURL:[NSURL URLWithString:self.NewsModel.imgsrc]];
+    
+    [self.imgIcon sd_setImageWithURL:[NSURL URLWithString:self.NewsModel.imgsrc] placeholderImage:[UIImage imageNamed:@"302"]];
     self.lblTitle.text = self.NewsModel.title;
     self.lblSubtitle.text = self.NewsModel.digest;
     
     // 如果回复太多就改成几点几万
-    if ([self.NewsModel.replyCount intValue]/1000 > 0) {
-        self.lblReply.text = [NSString stringWithFormat:@"%.1f万跟帖",([self.NewsModel.replyCount intValue] / 1000.0)];
+    CGFloat count =  [self.NewsModel.replyCount intValue];
+    NSString *displayCount;
+    if (count > 10000) {
+        displayCount = [NSString stringWithFormat:@"%.1f万跟帖",count/10000];
     }else{
-    self.lblReply.text = [NSString stringWithFormat:@"%@跟帖",self.NewsModel.replyCount];
+        displayCount = [NSString stringWithFormat:@"%.0f跟帖",count];
     }
+    self.lblReply.text = displayCount;
     
     // 多图cell
     if (self.NewsModel.imgextra.count == 2) {
-        [self.imgOther1 sd_setImageWithURL:[NSURL URLWithString:self.NewsModel.imgextra[0][@"imgsrc"]]];
-        [self.imgOther2 sd_setImageWithURL:[NSURL URLWithString:self.NewsModel.imgextra[1][@"imgsrc"]]];
+        
+//        [self.imgOther1 sd_setImageWithURL:[NSURL URLWithString:self.NewsModel.imgextra[0][@"imgsrc"]]];
+//        [self.imgOther2 sd_setImageWithURL:[NSURL URLWithString:self.NewsModel.imgextra[1][@"imgsrc"]]];
+        
+        [self.imgOther1 sd_setImageWithURL:[NSURL URLWithString:self.NewsModel.imgextra[0][@"imgsrc"]] placeholderImage:[UIImage imageNamed:@"302"]];
+        [self.imgOther2 sd_setImageWithURL:[NSURL URLWithString:self.NewsModel.imgextra[1][@"imgsrc"]] placeholderImage:[UIImage imageNamed:@"302"]];
     }
     
 }

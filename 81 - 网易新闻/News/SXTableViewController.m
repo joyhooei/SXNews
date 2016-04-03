@@ -13,33 +13,27 @@
 #import "SXNetworkTools.h"
 #import "MJRefresh.h"
 
+#import "MJExtension.h"
+
 @interface SXTableViewController ()
 
-@property(nonatomic,strong) NSArray *arrayList;
+@property(nonatomic,strong) NSMutableArray *arrayList;
+@property(nonatomic,assign)BOOL update;
 
 @end
-
-#define EALog(s,...) NSLog(@"<%@: 行 %d> %@ %@", [[NSString stringWithUTF8String:__FILE__] lastPathComponent], __LINE__, [NSString stringWithUTF8String:__PRETTY_FUNCTION__], [NSString stringWithFormat:(s), ##__VA_ARGS__]);
-
-
 
 @implementation SXTableViewController
 
 - (void)viewDidLoad {
     [super viewDidLoad];
-    
-    
-//    [self loadData];
-    [self.tableView addHeaderWithTarget:self action:@selector(loadData)];
-    
-//    self.tableView.headerHidden = NO;
-}
 
-- (void)setArrayList:(NSArray *)arrayList
-{
-    _arrayList = arrayList;
+    self.view.backgroundColor = [UIColor clearColor];
+    [self.tableView addHeaderWithTarget:self action:@selector(loadData)];
+    [self.tableView addFooterWithTarget:self action:@selector(loadMoreData)];
+    self.update = YES;
     
-    [self.tableView reloadData];
+    [[NSNotificationCenter defaultCenter]addObserver:self selector:@selector(welcome) name:@"SXAdvertisementKey" object:nil];
+//    self.tableView.headerHidden = NO;
 }
 
 - (BOOL)prefersStatusBarHidden
@@ -50,42 +44,77 @@
 - (void)setUrlString:(NSString *)urlString
 {
     _urlString = urlString;
-    [self loadData];
-//    [self.tableView reloadData];
+}
+
+- (void)welcome
+{
+    [[NSUserDefaults standardUserDefaults]setBool:YES forKey:@"update"];
+    [self.tableView headerBeginRefreshing];
 }
 
 - (void)viewWillAppear:(BOOL)animated
 {
-    EALog(@"bbbb");
-    [self.tableView headerBeginRefreshing];
+    if (![[NSUserDefaults standardUserDefaults]boolForKey:@"update"]) {
+        return;
+    }
+//    NSLog(@"bbbb");
+    if (self.update == YES) {
+        [self.tableView headerBeginRefreshing];
+        self.update = NO;
+    }
     [[NSNotificationCenter defaultCenter]postNotification:[NSNotification notificationWithName:@"contentStart" object:nil]];
 }
 
+
 #pragma mark - /************************* 刷新数据 ***************************/
+// ------下拉刷新
 - (void)loadData
 {
     // http://c.m.163.com//nc/article/headline/T1348647853363/0-30.html
-    EALog(@"%@",self.urlString);
-    [[[SXNetworkTools sharedNetworkTools]GET:self.urlString parameters:nil success:^(NSURLSessionDataTask *task, NSDictionary* responseObject) {
-        
+    NSString *allUrlstring = [NSString stringWithFormat:@"/nc/article/%@/0-20.html",self.urlString];
+    [self loadDataForType:1 withURL:allUrlstring];
+}
+
+// ------上拉加载
+- (void)loadMoreData
+{
+    NSString *allUrlstring = [NSString stringWithFormat:@"/nc/article/%@/%ld-20.html",self.urlString,(self.arrayList.count - self.arrayList.count%10)];
+//    NSString *allUrlstring = [NSString stringWithFormat:@"/nc/article/%@/%ld-20.html",self.urlString,self.arrayList.count];
+    [self loadDataForType:2 withURL:allUrlstring];
+}
+
+// ------公共方法
+- (void)loadDataForType:(int)type withURL:(NSString *)allUrlstring
+{
+    [[[SXNetworkTools sharedNetworkTools]GET:allUrlstring parameters:nil success:^(NSURLSessionDataTask *task, NSDictionary* responseObject) {
+        NSLog(@"%@",allUrlstring);
         NSString *key = [responseObject.keyEnumerator nextObject];
         
         NSArray *temArray = responseObject[key];
         
-        NSMutableArray *arrayM = [NSMutableArray arrayWithCapacity:temArray.count];
-        [temArray enumerateObjectsUsingBlock:^(id obj, NSUInteger idx, BOOL *stop) {
+        NSMutableArray *arrayM = [SXNewsModel objectArrayWithKeyValuesArray:temArray];
+        
+//        NSMutableArray *arrayM = [NSMutableArray arrayWithCapacity:temArray.count];
+//        [temArray enumerateObjectsUsingBlock:^(id obj, NSUInteger idx, BOOL *stop) {
+//            
+//            SXNewsModel *news = [SXNewsModel newsModelWithDict:obj];
+//            [arrayM addObject:news];
+//        }];
+        if (type == 1) {
+            self.arrayList = arrayM;
+            [self.tableView headerEndRefreshing];
+            [self.tableView reloadData];
+        }else if(type == 2){
+            [self.arrayList addObjectsFromArray:arrayM];
             
-            SXNewsModel *news = [SXNewsModel newsModelWithDict:obj];
-            [arrayM addObject:news];
-        }];
-        self.arrayList = arrayM;
-        [self.tableView headerEndRefreshing];
+            [self.tableView footerEndRefreshing];
+            [self.tableView reloadData];
+        }
         
     } failure:^(NSURLSessionDataTask *task, NSError *error) {
-        EALog(@"%@",error);
+        NSLog(@"%@",error);
     }] resume];
-
-}
+}// ------想把这里改成block来着
 
 #pragma mark - /************************* tbv数据源方法 ***************************/
 - (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section
@@ -97,6 +126,10 @@
     SXNewsModel *newsModel = self.arrayList[indexPath.row];
     
     NSString *ID = [SXNewsCell idForRow:newsModel];
+    
+    if ((indexPath.row%20 == 0)&&(indexPath.row != 0)) {
+        ID = @"NewsCell";
+    }
     
     SXNewsCell * cell = [tableView dequeueReusableCellWithIdentifier:ID];
     
@@ -111,7 +144,13 @@
 {
     SXNewsModel *newsModel = self.arrayList[indexPath.row];
     
-    return [SXNewsCell heightForRow:newsModel];
+    CGFloat rowHeight = [SXNewsCell heightForRow:newsModel];
+    
+    if ((indexPath.row%20 == 0)&&(indexPath.row != 0)) {
+        rowHeight = 80;
+    }
+    
+    return rowHeight;
 }
 
 - (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath
@@ -121,8 +160,6 @@
     
     UIViewController *vc = [[UIViewController alloc]init];
     vc.view.backgroundColor = [UIColor yellowColor];
-    
-    
 }
 
 - (void)prepareForSegue:(UIStoryboardSegue *)segue sender:(id)sender
@@ -136,14 +173,10 @@
         if ([self.navigationController respondsToSelector:@selector(interactivePopGestureRecognizer)]) {
             self.navigationController.interactivePopGestureRecognizer.delegate = nil;
         }
-//        [self.navigationController setNavigationBarHidden:YES animated:YES];
     }else{
         NSInteger x = self.tableView.indexPathForSelectedRow.row;
         SXPhotoSetController *pc = segue.destinationViewController;
         pc.newsModel = self.arrayList[x];
-        
-        
-//        [self.navigationController setNavigationBarHidden:YES animated:YES];
     }
     
 }
